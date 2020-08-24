@@ -6,11 +6,11 @@ static long last_blink = -1000;
 
 void setup() {
   Serial.begin(115200);
-  Serial.println("BASEline Mohawk");
+  Serial.println("Mohawk");
   gps_init();
-  bt_init();
+  bt_init(); // 700ms
   led_init();
-  beat(2);
+  beat();
 }
 
 void loop() {

@@ -75,3 +75,23 @@ Install Visual Studio Code and PlatformIO.
 Open the project in the `arduino` directory of this project.
 Connect the ESP32 to the computer by USB.
 Use the PlatformIO "Upload" function to program the device.
+
+## Mohawk Protocol
+
+Mohawk GPS sends location data via Bluetooth Low Energy (LE).
+The protocol is a custom protocol designed to compress information to as little data as possible.
+The goal is to minimize the time broadcasting on the bluetooth radio.
+This helps reduce interfere with GPS, and saves battery power.
+
+Mohawk location message fields:
+
+| field | size | description |
+| --- | --- | --- |
+| msg_type | 1 byte | 'L' |
+| time | 3 bytes | three least significant bytes of tenths since epoch |
+| latitude | 4 bytes | microdegrees |
+| longitude | 4 bytes | microdegrees |
+| altitude | 2 bytes | decimeters above sea level |
+| vN | 2 bytes | velocity north cm/s |
+| vE | 2 bytes | velocity east cm/s |
+| climb | 2 bytes | climbrate cm/s |

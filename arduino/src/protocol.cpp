@@ -11,14 +11,14 @@ LocationMessage pack(GeoPointV *point) {
   uint8_t time2 = tenths >> 8;
   uint8_t time3 = tenths;
   LocationMessage msg = {
-    'L',
+    .msg_type = 'L',
     time1, time2, time3,
-    (int)(point->lat * 1e6), // microdegrees
-    (int)(point->lng * 1e6), // microdegrees
-    (short)(point->alt * 10), // decimeters
-    (short)(point->vN * 100), // cm/s
-    (short)(point->vE * 100), // cm/s
-    (short)(point->climb * 100) // cm/s
+    .lat = (int)(point->lat * 1e6), // microdegrees
+    .lng = (int)(point->lng * 1e6), // microdegrees
+    .alt = (short)(point->alt * 10), // decimeters
+    .vN = (short)(point->vN * 100), // cm/s
+    .vE = (short)(point->vE * 100), // cm/s
+    .climb = (short)(point->climb * 100) // cm/s
   };
   return msg;
 }

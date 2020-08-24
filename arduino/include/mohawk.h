@@ -46,7 +46,7 @@ extern long last_fix_millis;
 // LED
 void led_init();
 void blink();
-void beat(int count);
+void beat();
 
 void bt_init();
 void bt_send(uint8_t *data, size_t len);
