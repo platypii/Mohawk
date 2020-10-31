@@ -34,7 +34,15 @@ class GpsCharacteristic : public BLECharacteristicCallbacks {
 
 void bt_init() {
   // Init BLE
-  BLEDevice::init("Mohawk"); // Device name
+  Serial.printf("%ld WTF1\n", millis());
+  BLEDevice::init("Mohawk");
+  Serial.printf("%ld WTF2\n", millis());
+  esp_bd_addr_t *addr = BLEDevice::getAddress().getNative(); // 6 bytes
+  char device_name[16];
+  sprintf(device_name, "Mohawk-%02X%02X", (*addr)[4], (*addr)[5]);
+  // std::string addr = BLEDevice::getAddress().toString();
+  // std::string device_name = "Mohawk-" + addr.substr(12, 2) + addr.substr(15, 2);
+  Serial.printf("%ld WTF3 %s\n", millis(), device_name);
   BLEServer *pServer = BLEDevice::createServer();
   pServer->setCallbacks(new GpsServer());
   BLEService *pService = pServer->createService(GPS_SERVICE);
