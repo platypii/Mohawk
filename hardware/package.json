@@ -1,0 +1,12 @@
+{
+  "name": "mohawk-hardware",
+  "description": "Hardware designs for Mohawk GPS",
+  "license": "MIT",
+  "dependencies": {
+    "@jscad/cli": "^2.2.21",
+    "@jscad/modeling": "^2.9.5"
+  },
+  "scripts": {
+    "mohawk": "npx jscad mohawk.js -o mohawk.stl"
+  }
+}

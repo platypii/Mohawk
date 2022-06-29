@@ -1,9 +1,14 @@
-// title      : BASEline Mohawk
-// author     : BASEline
-// license    : MIT License
-// revision   : 1.0
-// tags       : GPS,data,arduino,flysight
-// file       : mohawk.jscad
+/**
+ * BASEline Mohawk
+ * 3D printing CAD design for Mohawk GPS case written in JSCAD
+ */
+
+const jscad = require("@jscad/modeling")
+const { subtract, union } = jscad.booleans
+const { colorize } = jscad.colors
+const { extrudeLinear } = jscad.extrusions
+const { cube, cuboid, cylinder, roundedRectangle } = jscad.primitives
+const { rotate, rotateX, rotateY, scale, translate } = jscad.transforms
 
 const qty = 1
 
@@ -18,127 +23,145 @@ const halfwidth = width / 2
 
 const epsilon = 0.2
 
+const rad = (deg) => deg * Math.PI / 180
+
+const cylinderY = (opt) => rotateX(Math.PI / 2, cylinder(opt))
+
 function main() {
-  return union(
+  return [
     // mechanism(),
-    // translate([-45, -14, 2], cube({size: [90, 28, 1]})), // center guide
-    // color("blue", closure())
-    color("purple", body())
-  )
+    // cuboid({ size: [90, 28, 1] }), // center guide
+    // colorize([0, 0, 1], closure()),
+    colorize([0.4, 0.2, 0.55], body())
+  ]
 }
 
 function body() {
   return union(
-    difference(
+    subtract(
       outer(),
       helmet(),
       hollow(),
       door(-1),
       screw(),
-      translate([-200, -200, -400], cube(400)), // bottom half
-      translate([-81, -20, -10], rotate([0, -14, 0], cube(40))), // flat end
-      translate([42, -20, 0], rotate([0, 14, 0], cube(40))), // usb flat end
-      translate([40.99, -6.3, 7.5], rotate([0, 14, 0], cube({size: [6, 9, 3], radius: [0, .6, .6], fn: 15 * qty}))), // usb hole
-      translate([42.2, -7.05, 5.7], rotate([0, 14, 0], cube({size: [2, 10.6, 6], radius: [0, 2, 2], fn: 25 * qty}))) // usb access
+      cube({ size: 400, center: [0, 0, -200] }), // bottom half
+      translate([-63, 0, 0], rotateY(rad(-14), cube({ size: 40 }))), // flat end
+      translate([62.5, 0, 0], rotateY(rad(14), cube({ size: 40 }))), // usb flat end
+      usbHole()
     ),
     splits()
   )
 }
 
 function closure() {
-  return difference(
+  return subtract(
     door(epsilon - 1),
+    screw(),
     switchhole(),
     leds()
   )
 }
 
+function usbHole() {
+  const hole = extrudeLinear({ height: 2 }, roundedRectangle({ size: [3, 9], roundRadius: 0.6, segments: 15 * qty }))
+  const recess = extrudeLinear({ height: 8 }, roundedRectangle({ size: [6.2, 11], roundRadius: 1, segments: 25 * qty }))
+  return [
+    translate([42, -1.9, 9], rotateY(rad(104), hole)), // usb hole
+    translate([43, -1.9, 8.6], rotateY(rad(104), recess)) // usb recess
+  ]
+}
+
 function leds() {
-  const hole = cylinder({r: 1.1, h: 4, fn: 30 * qty})
-  return union(
-    translate([31.5, halfwidth - 3, 12.15], rotate([-90, 13, 0], scale([1.4,1,1], hole)))
-    // translate([36.5, halfwidth - 3, 10.8], rotate([-90, 16, 0], scale([1.4,1,1], hole)))
-  )
+  const hole = cylinderY({ radius: 1.1, height: 6, segments: 30 * qty })
+  return [
+    translate([31.5, halfwidth - 3, 12.15], rotateY(rad(13), scale([1.4, 1, 1], hole)))
+    // translate([36.5, halfwidth - 3, 10.8], rotateY(rad(16), scale([1.4, 1, 1], hole)))
+  ]
 }
 
 function switchhole() {
-  return translate([18, halfwidth - 2.4, 13], rotate([0, 11, 0],
-    union(
-      cube({size: [9, 1, 4], radius: [.2, 0, .2], fn: 15 * qty}), // switch body
-      translate([2.5, 0, 0.9], cube({size: [4.2, 4, 2.2]})) // Switch hole
-    )
+  const recess = extrudeLinear({ height: 0.4 }, roundedRectangle({ size: [9, 4], roundRadius: 0.2, segments: 15 * qty }))
+  return translate([22.8, halfwidth - 2, 14.1], rotateY(rad(11),
+    [
+      rotateX(rad(-90), recess), // switch recess
+      cuboid({ size: [4.2, 4, 2.2] }) // switch hole
+    ]
   ))
 }
 
 function door(delta) {
-  return difference(
-    cylinder({r: hawkR - thic - delta, start: [0, halfwidth - thic, hawkZ], end: [0, halfwidth, hawkZ], fn: 140 * qty}), // wall
+  return subtract(
+    translate([0, halfwidth - thic / 2, hawkZ], cylinderY({ radius: hawkR - thic - delta, height: thic, segments: 140 * qty })), // wall
     helmet(thic + delta),
-    screw(),
-    translate([-200, -200, -400], cube(400)), // bottom half
-    translate([-79 + delta, -20, -10], rotate([0, -14, 0], cube(40))), // flat end
-    translate([40 - delta, -20, 0], rotate([0, 14, 0], cube(40))) // usb flat end
+    // cube({ size: 400, center: [0, 0, -200] }), // bottom half
+    translate([-61 + delta, 0, 0], rotateY(rad(-14), cube({ size: 40 }))), // flat end
+    translate([60.5 - delta, 0, 0], rotateY(rad(14), cube({ size: 40 }))) // usb flat end
   )
 }
 
 function outer(delta) {
   delta = delta || 0
-  return cylinder({r: hawkR + delta, start: [0, -halfwidth, hawkZ], end: [0, halfwidth, hawkZ], fn: 140 * qty})
+  return translate([0, 0, hawkZ], cylinderY({ radius: hawkR + delta, height: width, segments: 140 * qty }))
 }
 
 function helmet(delta) {
   delta = delta || 0
-  return cylinder({r: helmetR + delta, start: [0, -halfwidth, helmetZ], end: [0, halfwidth, helmetZ], fn: 140 * qty})
+  return translate([0, 0, helmetZ], cylinderY({ radius: helmetR + delta, height: width, segments: 140 * qty }))
 }
 
 function hollow() {
-  return difference(
-    cylinder({r: hawkR - thic, start: [0, -11, hawkZ], end: [0, 13, hawkZ], fn: 140 * qty}),
-    // cylinder({r: 101, start: [0, -11, -86], end: [0, 9, -86], fn: 140 * qty}), // padding
+  return subtract(
+    translate([0, 1, hawkZ], cylinderY({ radius: hawkR - thic, height: 24, segments: 140 * qty })),
+    // translate([0, -1, -86], cylinderY({ radius: 101, height: 20, segments: 140 * qty })), // padding
     helmet(thic),
-    translate([-76, -20, -2], rotate([0, -14, 0], cube(40))), // flat end
-    translate([40, -20, 0], rotate([0, 14, 0], cube(40))) // usb flat end
+    translate([-55.5, 0, -2], rotateY(rad(-14), cube({ size: 40 }))), // flat end
+    translate([60.5, 0, 0], rotateY(rad(14), cube({ size: 40 }))) // usb flat end
   )
 }
 
 function screw() {
-  return translate([-40.7, 9, 9.7], union(
-    cylinder({r: 1.4, start: [0, -5, 0], end: [0, 4, 0], fn: 30 * qty})
-    // cylinder({r1: 0, r2: 2.7, start: [0, 1.5, 0], end: [0, 4, 0], fn: 30 * qty})
-  ))
+  return translate([-40.7, 9, 9.7], cylinderY({ radius: 1.4, height: 10, segments: 30 * qty }))
 }
 
 function splits() {
-  return union(
-    // translate([37, -11, 8], rotate([0, 12, 0], cube({size: [1, 2, 6]}))), // esp support
-    // translate([14, -11, 11], rotate([0, 6, 0], cube({size: [1, 2, 9]}))), // esp support
-    translate([8.5, -11, 11], rotate([0, 3, 0], cube({size: [1, 12, 10]}))), // front
-    translate([-11, -11, 11], rotate([0, -5, 0], cube({size: [1, 12, 9]}))) // back
-  )
+  return [
+    // translate([38, -10, 11], rotateY(rad(12), cuboid({ size: [1, 2, 6] }))), // esp support
+    // translate([15, -10, 16], rotateY(rad(6), cuboid({ size: [1, 2, 9] }))), // esp support
+    translate([9.3, -5, 16], rotateY(rad(3), cuboid({ size: [1, 12, 10] }))), // front
+    translate([-11, -5, 16], rotateY(rad(-5), cuboid({ size: [1, 12, 9] }))) // back
+  ]
 }
 
 //////////////////////
 function mechanism() {
-  return union(
-    cpu(),
+  return [
+    tinyPico(),
     battery(),
-    bn220()
-  )
+    bn180()
+  ]
 }
 
-function cpu() {
-  return color("green", translate([10, -10, 14], rotate([0, 12, 0],
-    cube({size: [32, 18, 4.2]})
-  ))) // TinyPICO
+function tinyPico() {
+  return colorize([0, 0.5, 0], translate([26, -1, 13], rotateY(rad(12),
+    cuboid({ size: [32, 18, 4.2] })
+  )))
 }
 
 function battery() {
-  return color("gray", translate([-37, -10, 9], rotate([0, -12, 0], cube({size: [22, 20, 4.2]}))))
+  return colorize([0.5, 0.5, 0.5], translate([-24, 0, 14], rotateY(rad(-12),
+    cuboid({ size: [22, 20, 4.2] })
+  )))
 }
 
-function bn220() {
-  return translate([-15, -10, 14], union(
-    color("blue", translate([0, 0, 0], cube({size: [22, 20, 4.2]}))),
-    color("brown", translate([2, 1, 4.4], cube({size: [18, 18, 2], round: true, radius: [1, 1, 0], fn: 15 * qty})))
-  ))
+function bn180() {
+  const antenna = extrudeLinear({ height: 2 },
+    roundedRectangle({ size: [18, 18], roundRadius: 1, segments: 15 * qty })
+  )
+  return translate([-1, 0, 16], [
+    colorize([0, 0, 0.8], cuboid({ size: [18, 18, 1] })),
+    colorize([0.8, 0.8, 0.8], cuboid({ size: [18, 12, 2], center: [0, -3, -1.7] })),
+    colorize([0.5, 0.2, 0.2], translate([0, 0, 0.6], antenna))
+  ])
 }
+
+module.exports = { main }
