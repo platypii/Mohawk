@@ -1,5 +1,8 @@
 # BASEline Mohawk GPS
 
+[![workflow status](https://github.com/platypii/Mohawk/actions/workflows/ci.yml/badge.svg)](https://github.com/platypii/Mohawk/actions)
+[![mit license](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+
 Mohawk is a helmet mounted wireless GPS for wingsuit, skydive, and BASE jumping.
 The key advantages are:
 
@@ -49,3 +52,14 @@ LED-|21   14|     |  \
     |       |
     +-------+
 ```
+
+## Firmware
+
+Mohawk firmware runs on small ESP32 dev boards, using the arduino framework. These are super cheap but powerful microcontrollers. PlatformIO is used to manage the software.
+
+### To program the device:
+
+Install Visual Studio Code and PlatformIO.
+Open the project in the `arduino` directory of this project.
+Connect the ESP32 to the computer by USB.
+Use the PlatformIO "Upload" function to program the device.
