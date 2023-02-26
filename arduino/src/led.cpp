@@ -7,8 +7,8 @@
 #define CHANNEL_LED 0
 
 void led_init() {
-  ledcAttachPin(PIN_LED, CHANNEL_LED);
   ledcSetup(CHANNEL_LED, 20000, 8);
+  ledcAttachPin(PIN_LED, CHANNEL_LED);
 }
 
 /**
