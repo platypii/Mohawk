@@ -4,9 +4,9 @@
 #include <stdint.h>
 #include <stddef.h>
 
-#define PIN_LED 21
-#define PIN_GPS_TX 32 // white GPS output
-#define PIN_GPS_RX 33 // green GPS input
+#define PIN_LED 8
+#define PIN_GPS_TX 7 // white GPS output
+#define PIN_GPS_RX 6 // green GPS input
 
 #define to_radians(degrees) (degrees * M_PI / 180.0)
 

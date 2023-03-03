@@ -16,7 +16,7 @@ Using cheap components, soldering, and a 3D printer, you can make your own Mohaw
 
 ## Components
 
- - TinyPICO ESP32 microcontroller $30
+ - TinyS3 ESP32 microcontroller $25
  - Beitian BN-180 GPS $20
  - 3.7V 200mAh LiPo battery 502025 $8
  - Slide switch
@@ -24,20 +24,23 @@ Using cheap components, soldering, and a 3D printer, you can make your own Mohaw
  - 3D printed case
  - M3 screw
 
+Note: This project originally used the TinoPICO.
+It has been upgraded to use the TinyS3 with faster ESP32-S3 processor and USB-C connector.
+
 ## Wiring
 
 ```
     +-------+
-    |23  BAT|-------+
-    |19  GND|       |
-    |18   5V|       |
-    |5    3V|-----+ |
-    |22    4|     | o
-LED-|21   14|     |  \
-+---|32   15|     | o
-| +-|33   27|     | |
-| | |RST  26|     | |
-| | |GND  25|     | |
+    |35  BAT|-------+
+    |37  GND|       |
+    |36   5V|       |
+    |34   3V|-----+ |
+    |9     1|     | o
+LED-|8     2|     |  \
++---|7     4|     | o
+| +-|6     5|     | |
+| | |RST  21|     | |
+| | |GND   0|     | |
 | | +-------+     | |
 | |               | |
 | +-------------+ | |
