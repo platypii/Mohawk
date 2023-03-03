@@ -10,14 +10,19 @@ The key advantages are:
  - Aerodynamic shape conforms to most helmets
 
 Mohawk is open source, designed for makers.
-Using cheap components, soldering, and a 3d printer, you can make your own Mohawk GPS.
+Using cheap components, soldering, and a 3D printer, you can make your own Mohawk GPS.
+
+![Mohawk GPS on a skydiving helmet](helmet.jpg)
 
 ## Components
 
  - TinyPICO ESP32 microcontroller $30
- - Beitian BN-180 GPS $16
+ - Beitian BN-180 GPS $20
  - 3.7V 200mAh LiPo battery 502025 $8
+ - Slide switch
+ - LED status light
  - 3D printed case
+ - M3 screw
 
 ## Wiring
 
@@ -53,11 +58,18 @@ LED-|21   14|     |  \
     +-------+
 ```
 
+## Assembly
+
+Connect the components according to the above schematic.
+Use thin guage wire of the appropriate length.
+
+![Mohawk GPS assembly](assembly.jpg)
+
 ## Firmware
 
 Mohawk firmware runs on small ESP32 dev boards, using the arduino framework. These are super cheap but powerful microcontrollers. PlatformIO is used to manage the software.
 
-### To program the device:
+### Program the device
 
 Install Visual Studio Code and PlatformIO.
 Open the project in the `arduino` directory of this project.
