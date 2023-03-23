@@ -32,8 +32,6 @@ const uint8_t UBLOX_INIT[] PROGMEM = {
   // 0xb5, 0x62, 0x06, 0x09, 0x0c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
 
-static long long parse_date(NAV_PVT *pvt);
-
 void ublox_init() {
   // Secondary serial port, since primary interferes with programming
   // Init at 9600, send 115200 command, switch to 115200
@@ -45,15 +43,26 @@ void ublox_init() {
 }
 
 void parse_ublox(char *buffer) {
-  // Serial.printf("UBX: %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
+  // Serial.printf("ubx %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
   if (buffer[0] == 0xb5 && buffer[1] == 0x62) {
     NAV_PVT *pvt = (NAV_PVT *) (buffer + 2);
     if (pvt->cls != 1 || pvt->id != 7) {
-      Serial.printf("Unexpected ublox message %x %x\n", pvt->cls, pvt->id);
+      log_millis();
+      Serial.printf("ubx unexpected message %x %x\n", pvt->cls, pvt->id);
     }
-    const long long millis = parse_date(pvt);
+
+    // Parse date
+    struct tm date;
+    date.tm_hour = pvt->hour;
+    date.tm_min = pvt->minute;
+    date.tm_sec = pvt->second;
+    date.tm_mday = pvt->day;
+    date.tm_mon = pvt->month - 1;
+    date.tm_year = pvt->year - 1900; // years since 1900
+
     GeoPointV *point = new GeoPointV {
-      .millis = millis,
+      .date = date,
+      .millis = pvt->nano / 1000000,
       .lat = pvt->lat * 1e-7,
       .lng = pvt->lon * 1e-7,
       .alt = pvt->hMSL * 1e-3, // mm
@@ -63,18 +72,7 @@ void parse_ublox(char *buffer) {
     };
     update_location(point);
   } else {
-    Serial.printf("Invalid UBX header: %x %x %s\n", buffer[0], buffer[1], buffer);
+    log_millis();
+    Serial.printf("ubx invalid header: %x %x %s\n", buffer[0], buffer[1], buffer);
   }
-}
-
-static long long parse_date(NAV_PVT *pvt) {
-  struct tm date;
-  date.tm_hour = pvt->hour;
-  date.tm_min = pvt->minute;
-  date.tm_sec = pvt->second;
-  date.tm_isdst = 0;
-  date.tm_mday = pvt->day;
-  date.tm_mon = pvt->month - 1;
-  date.tm_year = pvt->year - 1900; // years since 1900
-  return mktime(&date) * 1000LL + pvt->nano * 1e-6;
 }

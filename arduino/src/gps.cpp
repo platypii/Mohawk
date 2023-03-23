@@ -20,8 +20,8 @@ void gps_loop() {
       buffer[buffer_index] = ch;
 
       if (buffer[0] != '$' && buffer[0] != 0xb5) {
-        // Serial.printf("Invalid gps prefix %x %c\n", buffer[0], buffer[0]);
-        Serial.printf("Unexpected: %c %x\n", buffer[0], buffer[0]);
+        log_millis();
+        Serial.printf("gps unexpected: %c %x\n", buffer[0], buffer[0]);
         buffer_index = 0;
         break;
       }
@@ -29,19 +29,20 @@ void gps_loop() {
       // Check for termination
       if (buffer[0] == '$' && ch == '\n') {
         buffer[buffer_index - 1] = '\0'; // "\r\n"
-        // Serial.printf("NMEA: %s\n", buffer);
+        // Serial.printf("nmea %s\n", buffer);
         parse_nmea(buffer);
         buffer_index = 0;
         break;
       } else if (buffer[0] == 0xb5 && buffer_index == sizeof(NAV_PVT) + 3) { // sizeof(NAV_PVT) == 96
-        // Serial.printf("UBX: %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
+        // Serial.printf("ubx %x %x %x %x\n", buffer[0], buffer[1], buffer[2], buffer[3]);
         parse_ublox(buffer);
         buffer_index = 0;
         break;
       }
       buffer_index++;
       if (buffer_index >= 256) {
-        Serial.printf("Missing terminator\n");
+        log_millis();
+        Serial.print("gps missing terminator\n");
         buffer_index = 0;
       }
     }

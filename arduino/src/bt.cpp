@@ -16,11 +16,13 @@ static void advertise();
 class GpsServer : public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
       bt_connected = true;
-      Serial.println("BT client connected");
+      log_millis();
+      Serial.print("bt client connected\n");
     };
     void onDisconnect(BLEServer* pServer) {
       bt_connected = false;
-      Serial.println("BT client disconnected");
+      log_millis();
+      Serial.print("bt client disconnected\n");
       advertise();
     }
 };
@@ -31,7 +33,8 @@ class GpsCharacteristic : public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
       // Handle commands from phone here
       std::string value = pCharacteristic->getValue();
-      Serial.printf("Unexpected BT msg %02x %d\n", value[0], value.length());
+      log_millis();
+      Serial.printf("bt unexpected %02x size %d\n", value[0], value.length());
     }
 };
 
@@ -70,12 +73,14 @@ static void advertise() {
   BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
   pAdvertising->addServiceUUID(GPS_SERVICE);
   pAdvertising->setScanResponse(true);
-  pAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
+  pAdvertising->setMinPreferred(0x06); // helps with iphone issue
   pAdvertising->setMinPreferred(0x12);
   BLEDevice::startAdvertising();
 }
 
 void bt_send(uint8_t *data, size_t len) {
-  gps_ch->setValue(data, len);
-  gps_ch->notify();
+  if (bt_connected) {
+    gps_ch->setValue(data, len);
+    gps_ch->notify();
+  }
 }

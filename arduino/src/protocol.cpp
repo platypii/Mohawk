@@ -5,7 +5,8 @@
  */
 LocationMessage pack(GeoPointV *point) {
   // three least significant bytes of tenths since epoch
-  long long tenths = (point->millis + 50) / 100; // round to nearest tenth
+  long long millis = mktime(&point->date) * 1000LL + point->millis;
+  long long tenths = (millis + 50) / 100; // round to nearest tenth
   uint8_t time1 = tenths >> 16;
   uint8_t time2 = tenths >> 8;
   uint8_t time3 = tenths;

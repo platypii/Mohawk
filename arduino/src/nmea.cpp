@@ -11,8 +11,6 @@
 static void parse_gga(const char *line);
 static void parse_rmc(char *line);
 static double parse_degrees_minutes(const char *dm, const char *nsew);
-static long long parse_date(const char *str);
-static long long parse_time(const char *str);
 static double parse_double(const char *str);
 
 // Global altitude
@@ -34,10 +32,10 @@ void parse_nmea(char *line) {
  */
 static void parse_gga(const char *line) {
   // Parse altitude from split[9]
-  int commaCount = 0;
+  int commas = 0;
   for (int i = 0; line[i]; i++) {
     if (line[i] == ',') {
-      if (++commaCount == 9) {
+      if (++commas == 9) {
         altitude = parse_double(line + i + 1);
       }
     }
@@ -48,30 +46,39 @@ static void parse_gga(const char *line) {
  * Parse location from RMC sentence
  */
 static void parse_rmc(char *line) {
-  // char timeStr[10], status, latDM[11], latNS, lngDM[11], lngEW, dateStr[7];
+  // char time_str[10], status, latDM[11], latNS, lngDM[11], lngEW, date_str[7];
   const char *TOK = ",";
   strsep(&line, TOK); // command
-  char *timeStr = strsep(&line, TOK);
+  char *time_str = strsep(&line, TOK);
   strsep(&line, TOK); // status
   char *latDM = strsep(&line, TOK);
   char *latNS = strsep(&line, TOK);
   char *lngDM = strsep(&line, TOK);
   char *lngEW = strsep(&line, TOK);
-  char *hspeedStr = strsep(&line, TOK);
-  char *bearingStr = strsep(&line, TOK);
-  char *dateStr = strsep(&line, TOK);
+  char *hspeed_str = strsep(&line, TOK);
+  char *bearing_str = strsep(&line, TOK);
+  char *date_str = strsep(&line, TOK);
 
-  if (!dateStr || !timeStr) {
+  if (!date_str || !time_str) {
     return;
   }
 
-  // sscanf(line, "$GPRMC,%s,%c,%s,%c,%s,%c,%lf,%lf,%s", timeStr, &status, latDM, &latNS, lngDM, &lngEW, &hspeed, &bearing, dateStr);
-  const long long int millis = parse_date(dateStr) + parse_time(timeStr);
+  struct tm date;
+  // Parse HHMMSS.SS time
+  date.tm_hour = parseInt2(time_str[0], time_str[1]);
+  date.tm_min = parseInt2(time_str[2], time_str[3]);
+  date.tm_sec = parseInt2(time_str[4], time_str[5]);
+  // Parse DDMMYY date
+  date.tm_mday = parseInt2(date_str[0], date_str[1]);
+  date.tm_mon = parseInt2(date_str[2], date_str[3]) - 1;
+  date.tm_year = parseInt2(date_str[4], date_str[5]) + 100;
+  const short milli = parseInt2(time_str[7], time_str[8]) * 10;
+
   const double lat = parse_degrees_minutes(latDM, latNS);
   const double lng = parse_degrees_minutes(lngDM, lngEW);
   const double climb = NAN; // TODO: Kalman
-  const double hspeed = parse_double(hspeedStr) * KNOTS;
-  double bearing = parse_double(bearingStr);
+  const double hspeed = parse_double(hspeed_str) * KNOTS;
+  double bearing = parse_double(bearing_str);
   if (isnan(bearing)) {
     // At low speeds, bearing is often NaN
     // Setting it to north is weird but better than throwing away the point
@@ -83,7 +90,7 @@ static void parse_rmc(char *line) {
   // Filter out unlikely lat/lng
   if (fabs(lat) > 0.1 || fabs(lng) > 0.1) {
     // Generate point
-    GeoPointV *point = new GeoPointV { millis, lat, lng, altitude, climb, vN, vE };
+    GeoPointV *point = new GeoPointV { date, milli, lat, lng, altitude, climb, vN, vE };
     update_location(point);
   }
 }
@@ -109,32 +116,6 @@ static double parse_degrees_minutes(const char *dm, const char *nsew) {
   } else {
     return degrees;
   }
-}
-
-/**
- * Parse DDMMYY into milliseconds since epoch
- */
-static long long parse_date(const char *str) {
-  struct tm date;
-  date.tm_hour = 0;
-  date.tm_min = 0;
-  date.tm_sec = 0;
-  date.tm_isdst = 0;
-  date.tm_mday = parseInt2(str[0], str[1]);
-  date.tm_mon = parseInt2(str[2], str[3]) - 1;
-  date.tm_year = parseInt2(str[4], str[5]) + 100;
-  return mktime(&date) * 1000LL;
-}
-
-/**
- * Parse HHMMSS.SS UTC time into milliseconds since midnight
- */
-static long long parse_time(const char *str) {
-  const int h = parseInt2(str[0], str[1]);
-  const int m = parseInt2(str[2], str[3]);
-  const int s = parseInt2(str[4], str[5]);
-  const int hundredths = parseInt2(str[7], str[8]);
-  return h * 3600000 + m * 60000 + s * 1000 + hundredths * 10;
 }
 
 /**
