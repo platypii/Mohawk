@@ -11,13 +11,13 @@
 #define to_radians(degrees) (degrees * M_PI / 180.0)
 
 struct GeoPointV {
-  long long millis;
-  double lat;
-  double lng;
-  double alt;
-  double climb;
-  double vN;
-  double vE;
+  long long millis; // milliseconds since epoch
+  double lat; // degrees
+  double lng; // degrees
+  double alt; // meters
+  double climb; // m/s
+  double vN; // m/s
+  double vE; // m/s
 };
 
 /**

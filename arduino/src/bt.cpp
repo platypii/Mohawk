@@ -11,6 +11,8 @@
 bool bt_connected = false;
 static BLECharacteristic *gps_ch;
 
+static void advertise();
+
 class GpsServer : public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
       bt_connected = true;
@@ -19,6 +21,7 @@ class GpsServer : public BLEServerCallbacks {
     void onDisconnect(BLEServer* pServer) {
       bt_connected = false;
       Serial.println("BT client disconnected");
+      advertise();
     }
 };
 
@@ -53,19 +56,23 @@ void bt_init() {
   gps_ch->addDescriptor(pDescriptor);
   gps_ch->setCallbacks(new GpsCharacteristic());
 
-  pService->start();
-  // BLEAdvertising *pAdvertising = pServer->getAdvertising();  // this still is working for backward compatibility
-  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
-  pAdvertising->addServiceUUID(GPS_SERVICE);
-  pAdvertising->setScanResponse(true);
-  pAdvertising->setMinPreferred(0x06);  // functions that help with iPhone connections issue
-  pAdvertising->setMinPreferred(0x12);
-  BLEDevice::startAdvertising();
-
   // Enable bonding, so that it can be discovered in BASEline
   BLESecurity *bSecurity = new BLESecurity();
   bSecurity->setAuthenticationMode(ESP_LE_AUTH_BOND);
   bSecurity->setCapability(ESP_IO_CAP_NONE);
+
+  pService->start();
+  advertise();
+}
+
+static void advertise() {
+  // BLEAdvertising *pAdvertising = pServer->getAdvertising(); // this still is working for backward compatibility
+  BLEAdvertising *pAdvertising = BLEDevice::getAdvertising();
+  pAdvertising->addServiceUUID(GPS_SERVICE);
+  pAdvertising->setScanResponse(true);
+  pAdvertising->setMinPreferred(0x06); // functions that help with iPhone connections issue
+  pAdvertising->setMinPreferred(0x12);
+  BLEDevice::startAdvertising();
 }
 
 void bt_send(uint8_t *data, size_t len) {
