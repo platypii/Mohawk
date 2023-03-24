@@ -1,4 +1,17 @@
+#include <limits.h>
 #include "mohawk.h"
+
+/**
+ * Convert double to short (16 bits).
+ * Out of range returns SHRT_MAX 0x7fff.
+ */
+static short pack16(double in) {
+  if (SHRT_MIN <= in && in < SHRT_MAX) {
+    return (short)(in);
+  } else {
+    return SHRT_MAX;
+  }
+}
 
 /**
  * Pack point into compact LocationMessage
@@ -15,10 +28,10 @@ LocationMessage pack(GeoPointV *point) {
     time1, time2, time3,
     .lat = (int)(point->lat * 1e6), // microdegrees
     .lng = (int)(point->lng * 1e6), // microdegrees
-    .alt = (short)(point->alt * 10), // decimeters
-    .vN = (short)(point->vN * 100), // cm/s
-    .vE = (short)(point->vE * 100), // cm/s
-    .climb = (short)(point->climb * 100) // cm/s
+    .alt = pack16(point->alt * 10 - 31768), // decimeters -100..6453.5m MSL
+    .vN = pack16(point->vN * 100), // cm/s
+    .vE = pack16(point->vE * 100), // cm/s
+    .climb = pack16(point->climb * 100) // cm/s
   };
   return msg;
 }

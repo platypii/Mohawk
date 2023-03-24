@@ -89,9 +89,11 @@ Mohawk location message fields:
 | --- | --- | --- |
 | msg_type | 1 byte | 'L' |
 | time | 3 bytes | three least significant bytes of tenths since epoch |
-| latitude | 4 bytes | microdegrees |
-| longitude | 4 bytes | microdegrees |
-| altitude | 2 bytes | decimeters above sea level |
-| vN | 2 bytes | velocity north cm/s |
-| vE | 2 bytes | velocity east cm/s |
-| climb | 2 bytes | climbrate cm/s |
+| latitude | 4 byte int | microdegrees |
+| longitude | 4 byte int | microdegrees |
+| altitude | 2 byte short | decimeters above 3176.8m MSL |
+| vN | 2 byte short | velocity north cm/s |
+| vE | 2 byte short | velocity east cm/s |
+| climb | 2 byte short | climbrate cm/s |
+
+The 2 byte fields `altitude`, `vN`, `vE`, and `climb` represent `NaN` as maximum short value `0x7fff`.
