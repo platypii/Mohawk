@@ -3,8 +3,8 @@
   "description": "Hardware designs for Mohawk GPS",
   "license": "MIT",
   "dependencies": {
-    "@jscad/cli": "^2.2.25",
-    "@jscad/modeling": "^2.11.0"
+    "@jscad/cli": "^2.3.0",
+    "@jscad/modeling": "^2.12.0"
   },
   "scripts": {
     "mohawk": "npx jscad mohawk.js -o mohawk.stl"

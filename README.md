@@ -61,18 +61,19 @@ LED-|21   14|     |  \
 ## Assembly
 
 Connect the components according to the above schematic.
-Use thin guage wire of the appropriate length.
+Use thin-guage wire of the appropriate length.
 
 ![Mohawk GPS assembly](assembly.jpg)
 
 ## Firmware
 
-Mohawk firmware runs on small ESP32 dev boards, using the arduino framework. These are super cheap but powerful microcontrollers. PlatformIO is used to manage the software.
+Mohawk firmware runs on small ESP32 dev boards, using the arduino framework.
+These are cheap but powerful microcontrollers. PlatformIO is used to manage the software.
 
 ### Program the device
 
 Install Visual Studio Code and PlatformIO.
-Open the project in the `arduino` directory of this project.
+In VSCode, open the `arduino` directory of this repository.
 Connect the ESP32 to the computer by USB.
 Use the PlatformIO "Upload" function to program the device.
 
@@ -91,7 +92,7 @@ Mohawk location message fields:
 | time | 3 bytes | three least significant bytes of tenths since epoch |
 | latitude | 4 byte int | microdegrees |
 | longitude | 4 byte int | microdegrees |
-| altitude | 2 byte short | decimeters above 3176.8m MSL |
+| altitude | 2 byte short | decimeters above -100m MSL |
 | vN | 2 byte short | velocity north cm/s |
 | vE | 2 byte short | velocity east cm/s |
 | climb | 2 byte short | climbrate cm/s |

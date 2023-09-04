@@ -23,9 +23,12 @@ void loop() {
 void update_location(GeoPointV *point) {
   // Log the new point
   log_date(&point->date, point->millis);
-  // Lat,lng,alt
-  Serial.printf(" %f,%f %.1fm", point->lat, point->lng, point->alt);
-  // Climb
+  // Latitude,longitude
+  Serial.printf(" %f,%f", point->lat, point->lng);
+  // Altitude
+  if (isnan(point->alt)) Serial.print(" nan");
+  else Serial.printf(" %.1fm", point->alt);
+  // Climb rate
   if (isnan(point->climb)) Serial.print(" nan");
   else Serial.printf(" %.1fm/s", point->climb);
   // Ground speed
